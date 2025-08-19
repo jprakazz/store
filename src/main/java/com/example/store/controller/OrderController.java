@@ -8,9 +8,11 @@ import com.example.store.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/order")
@@ -23,6 +25,16 @@ public class OrderController {
     @GetMapping
     public List<OrderDTO> getAllOrders() {
         return orderMapper.ordersToOrderDTOs(orderRepository.findAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderDTO> getOrderById(@PathVariable Long id) {
+        Optional<Order> order = orderRepository.findById(id);
+        if (order.isPresent()) {
+            return ResponseEntity.ok(orderMapper.orderToOrderDTO(order.get()));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
