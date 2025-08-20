@@ -7,6 +7,7 @@ import com.example.store.repository.CustomerRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,11 +22,13 @@ public class CustomerController {
     private final CustomerMapper customerMapper;
 
     @GetMapping
+    @Cacheable("customers")
     public List<CustomerDTO> getAllCustomers() {
         return customerMapper.customersToCustomerDTOs(customerRepository.findAll());
     }
 
     @GetMapping("/search")
+    @Cacheable(value = "customerSearch", key = "#q")
     public List<CustomerDTO> searchCustomers(@RequestParam String q) {
         return customerMapper.customersToCustomerDTOs(customerRepository.findByNameContainingIgnoreCase(q));
     }

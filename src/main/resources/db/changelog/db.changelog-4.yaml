@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4-order-product-junction
+      author: jprakashjoseph18@gmail.com
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: order_product
+      changes:
+        - createTable:
+            tableName: order_product
+            columns:
+              - column:
+                  name: order_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: product_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: order_product
+            columnNames: order_id, product_id
+        - addForeignKeyConstraint:
+            baseTableName: order_product
+            baseColumnNames: order_id
+            referencedTableName: "order"
+            referencedColumnNames: id
+            constraintName: fk_order_product_order
+        - addForeignKeyConstraint:
+            baseTableName: order_product
+            baseColumnNames: product_id
+            referencedTableName: product
+            referencedColumnNames: id
+            constraintName: fk_order_product_product

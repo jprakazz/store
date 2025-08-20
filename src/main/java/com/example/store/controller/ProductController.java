@@ -7,27 +7,32 @@ import com.example.store.repository.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/products")
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProductController {
 
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
 
     @GetMapping
+    @Cacheable("products")
     public List<ProductDTO> getAllProducts() {
         return productMapper.productsToProductDTOs(productRepository.findAll());
     }
 
     @GetMapping("/{id}")
+    @Cacheable(value = "product", key = "#id")
     public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
         Optional<Product> product = productRepository.findById(id);
         if (product.isPresent()) {
@@ -39,7 +44,9 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductDTO createProduct(@RequestBody Product product) {
+    @Transactional
+    public ProductDTO createProduct(@RequestBody ProductDTO productDTO) {
+        Product product = productMapper.productDTOToProduct(productDTO);
         return productMapper.productToProductDTO(productRepository.save(product));
     }
 }
